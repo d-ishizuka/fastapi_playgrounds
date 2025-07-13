@@ -81,3 +81,21 @@ async def update_memo(
         print(">>> データ更新完了")
     
     return memo
+
+async def delete_memo(db_session: AsyncSession, memo_id: int) -> memo_model.Memo | None:
+    """
+        データベースのメモを削除する関数
+        Args:
+            db_session(AsyncSession): 非同期DBセッション
+            memo_id(int): 削除するメモのID(プライマリキー)
+        Returns:
+            Memo | None: 削除されたメモのモデル、メモが存在しない場合はNoneを返す
+    """
+    print("=== データ削除：開始 ===")
+    memo = await get_memo_by_id(db_session, memo_id)
+    if memo:
+        await db_session.delete(memo)
+        await db_session.commit()
+        print(">>> データ削除完了")
+    
+    return memo
