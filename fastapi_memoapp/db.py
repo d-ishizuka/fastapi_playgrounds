@@ -4,7 +4,7 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-base_dir = os.path.dirname(os.path.dirname(__file__))
+base_dir = os.path.dirname(__file__)
 DATABASE_URL = 'sqlite+aiosqlite:///' + os.path.join(base_dir, 'memodb.sqlite')
 
 engine = create_async_engine(DATABASE_URL, echo=True)

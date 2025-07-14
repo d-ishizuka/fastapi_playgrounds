@@ -16,13 +16,18 @@ async def insert_memo(
         Returns:
             Memo: 作成されたメモのモデル
     """
-    print("=== 新規登録：開始 ===")
-    new_memo = memo_model.Memo(**memo_data.model_dump())
-    db_session.add(new_memo)
-    await db_session.commit()
-    await db_session.refresh(new_memo)
-    print(">>> データ追加完了")
-    return new_memo
+    try:
+        print("=== 新規登録：開始 ===")
+        new_memo = memo_model.Memo(**memo_data.model_dump())
+        db_session.add(new_memo)
+        await db_session.commit()
+        await db_session.refresh(new_memo)
+        print(">>> データ追加完了")
+        return new_memo
+    except Exception as e:
+        print(f"エラーが発生しました: {e}")
+        await db_session.rollback()
+        raise e
 
 async def get_memos(db_session: AsyncSession) -> list[memo_model.Memo]:
     """
