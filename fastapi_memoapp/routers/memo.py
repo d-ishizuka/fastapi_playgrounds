@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from schemas.memo import UpsertMemoSchema, MemoSchema, ResponseSchema
+from schemas.memo import UpsertMemoSchema, MemoSchema, ResponseSchema, MemoStatusSchema
 import cruds.memo as memo_crud
 import db
 
@@ -18,7 +18,21 @@ async def create_memo(memo: UpsertMemoSchema, db: AsyncSession = Depends(db.get_
 @router.get("/", response_model=list[MemoSchema])
 async def get_memos_list(db: AsyncSession = Depends(db.get_dbsession)):
     memos = await memo_crud.get_memos(db)
-    return memos
+    # データベースのモデルをスキーマに変換
+    memo_schemas = []
+    for memo in memos:
+        memo_schema = MemoSchema(
+            memo_id=memo.memo_id,
+            title=memo.title,
+            description=memo.description,
+            status=MemoStatusSchema(
+                priority=memo.priority,
+                due_date=memo.due_date,
+                is_completed=memo.is_completed
+            )
+        )
+        memo_schemas.append(memo_schema)
+    return memo_schemas
 
 @router.put("/{memo_id}", response_model=ResponseSchema)
 async def modify_memo(memo_id: int, memo: UpsertMemoSchema, db: AsyncSession = Depends(db.get_dbsession)):

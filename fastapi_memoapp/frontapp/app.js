@@ -27,6 +27,11 @@ function resetForm() {
     document.querySelector('#createMemoForm button[type="submit"]').style.display = 'block';
     // 編集中のメモIDをリセット
     editingMemoId = null;
+    // ▽▽▽ 追加 ▽▽▽
+    document.getElementById('priority').value = '低';
+    document.getElementById('due_date').value = '';
+    document.getElementById('is_completed').checked = false;
+    // △△△ 追加 △△△
 }
 
 /**
@@ -34,6 +39,7 @@ function resetForm() {
 */
 async function createMemo(memo) {
     try {
+        console.log('送信するメモデータ:', memo); // デバッグ用
         // APIに「POSTリクエスト」を送信してメモを作成します。
         // headersに'Content-Type'を'application/json'に設定し
         // JSON形式のデータを送信
@@ -158,9 +164,14 @@ async function fetchAndDisplayMemos() {
             row.innerHTML = `
                 <td>${memo.title}</td>
                 <td>${memo.description}</td>
+                <!-- ▽▽▽ 追加 ▽▽▽ -->
+                <td>${memo.status.priority}</td>
+                <td>${memo.status.due_date ? memo.status.due_date.split('T')[0] : ''}</td>
+                <td>${memo.status.is_completed ? '完了' : '未完了'}</td>
+                <!-- △△△ 追加 △△△ -->
                 <td>
-                <button class="edit" data-id="${memo.memo_id}">編集</button>
-                <button class="delete" data-id="${memo.memo_id}">削除</button>
+                    <button class="edit" data-id="${memo.memo_id}">編集</button>
+                    <button class="delete" data-id="${memo.memo_id}">削除</button>
                 </td>
             `;
             // 作成した行をテーブルのbodyに追加
@@ -190,6 +201,12 @@ async function editMemo(memoId) {
     // 取得したメモのタイトルと説明をフォームに設定
     document.getElementById('title').value = memo.title;
     document.getElementById('description').value = memo.description;
+    // ▽▽▽ 追加 ▽▽▽
+    document.getElementById('priority').value = memo.status.priority;
+    // 期限日を設定するため、日付が存在する場合のみ設定
+    document.getElementById('due_date').value = memo.status.due_date ? memo.status.due_date.split('T')[0] : '';
+    document.getElementById('is_completed').checked = memo.status.is_completed;
+    // △△△ 追加 △△△
     // === フォーム ===
     // フォームの見出しを「メモの編集」に更新
     document.getElementById('formTitle').textContent = 'メモの編集';
@@ -214,8 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // タイトルと説明の入力値を取得
         const title = document.getElementById('title').value;
         const description = document.getElementById('description').value;
+        // ▽▽▽ 追加 ▽▽▽
+        const priority = document.getElementById('priority').value;
+        const due_date = document.getElementById('due_date').value;
+        const is_completed = document.getElementById('is_completed').checked;
         // メモオブジェクトを作成
-        const memo = { title, description };
+        const memo = { title, description, status: { priority, due_date, is_completed } };
+        // △△△ 追加 △△△
 
         // 編集中のメモIDがある場合は更新、なければ新規作成を実行
         if (editingMemoId) {
@@ -230,8 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // タイトルと説明の入力値を取得
         const title = document.getElementById('title').value;
         const description = document.getElementById('description').value;
-        // 更新関数を実行
-        await updateMemo({ title, description });
+        // ▽▽▽ 追加 ▽▽▽
+        const priority = document.getElementById('priority').value;
+        const due_date = document.getElementById('due_date').value;
+        const is_completed = document.getElementById('is_completed').checked;
+        await updateMemo({ title, description, status: { priority, due_date, is_completed } });
+        // △△△ 追加 △△△
     };
 
     // メモ一覧テーブル内のクリックイベントを監視
